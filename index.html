@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trung Tâm Kidstars - Đơn xin nghỉ học</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            width: 90%;
+            max-width: 400px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Trung Tâm Kidstars - Đơn xin nghỉ học</h2>
+        <form id="absenceForm">
+            <label for="studentName">Tên học sinh:</label>
+            <input type="text" id="studentName" name="studentName" required>
+
+            <label for="subject">Môn học:</label>
+            <select id="subject" name="subject" required>
+                <option value="Piano">Piano</option>
+                <option value="Guitar">Guitar</option>
+                <option value="Nhảy">Nhảy</option>
+                <option value="Vẽ">Vẽ</option>
+                <option value="Thanh nhạc">Thanh nhạc</option>
+                <option value="MC">MC</option>
+            </select>
+
+            <label for="reason">Lý do xin nghỉ:</label>
+            <textarea id="reason" name="reason" rows="4" required></textarea>
+
+            <button type="button" onclick="sendEmail()">Gửi đơn</button>
+        </form>
+    </div>
+
+    <script>
+        function sendEmail() {
+            const studentName = document.getElementById('studentName').value;
+            const subject = document.getElementById('subject').value;
+            const reason = document.getElementById('reason').value;
+
+            const emailData = {
+                studentName: studentName,
+                subject: subject,
+                reason: reason
+            };
+
+            fetch('https://script.google.com/macros/s/AKfycbwwrJLD3nkbVDTLRqnFQ7l8RoDHBE19_t-kSj3NQ1iRio4keVeDwolfoV0Q1LbCi_rMOA/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(emailData)
+            }).then(() => {
+                alert('Đơn xin nghỉ học đã được gửi thành công!');
+                document.getElementById('absenceForm').reset();
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            });
+        }
+    </script>
+</body>
+</html>
