@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung Tâm Kidstars - Đơn xin nghỉ học</title>
+    <!-- Tải Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"></script>
     <style>
+        /* CSS cơ bản để định dạng giao diện */
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -85,10 +87,8 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
+    <script>
+        // Cấu hình Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDKMb-bNj_wgS9Ss6W6sPd6sHkyuB0qcjU",
             authDomain: "linkxinnghi.firebaseapp.com",
@@ -99,8 +99,9 @@
             measurementId: "G-REYGXC873Y"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // Khởi tạo Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         async function handleFormSubmission() {
             const studentName = document.getElementById('studentName').value.trim();
@@ -119,11 +120,11 @@
             }
 
             try {
-                const docRef = doc(db, "absences", phoneNumber);
-                const docSnap = await getDoc(docRef);
+                const docRef = db.collection("absences").doc(phoneNumber);
+                const docSnap = await docRef.get();
 
                 let absenceCount = 0;
-                if (docSnap.exists()) {
+                if (docSnap.exists) {
                     absenceCount = docSnap.data().absenceCount;
                     const confirmResult = confirm(`Phụ huynh đã xin nghỉ ${absenceCount} lần. Bạn có chắc muốn tiếp tục xin nghỉ không?`);
                     if (!confirmResult) {
@@ -133,42 +134,19 @@
 
                 absenceCount += 1;
 
-                await setDoc(docRef, {
+                await docRef.set({
                     studentName,
                     subject,
                     reason,
                     absenceCount
                 }, { merge: true });
 
-                await sendEmailNotification(studentName, subject, reason, absenceCount);
+                alert(`Đơn xin nghỉ học đã được gửi thành công! Số lần xin nghỉ hiện tại: ${absenceCount}`);
+                document.getElementById('absenceForm').reset();
             } catch (error) {
                 console.error("Lỗi khi xử lý đơn xin nghỉ:", error);
                 alert("Có lỗi xảy ra. Vui lòng thử lại.");
             }
-        }
-
-        function sendEmailNotification(studentName, subject, reason, absenceCount) {
-            const emailData = {
-                studentName,
-                subject,
-                reason,
-                absenceCount
-            };
-
-            return fetch('https://script.google.com/macros/s/AKfycbwfIn6sAj7gi6iMDPJTlGboZM1JAZUpoRT0XB4oLCjWVjEBKC7vPOdUyKkcHrVtcw-avg/exec', {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(emailData)
-            }).then(() => {
-                alert(`Đơn xin nghỉ học đã được gửi thành công! Số lần xin nghỉ hiện tại: ${absenceCount}`);
-                document.getElementById('absenceForm').reset();
-            }).catch(error => {
-                console.error("Error:", error);
-                alert("Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.");
-            });
         }
     </script>
 </body>
