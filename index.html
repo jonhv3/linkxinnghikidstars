@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung Tâm Kidstars - Đơn xin nghỉ học</title>
-    <!-- Tải Firebase SDKs đúng cho trình duyệt -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+    <!-- Tải Firebase SDKs từ CDN -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
         /* CSS cơ bản để định dạng giao diện */
         body {
@@ -100,8 +100,8 @@
         };
 
         // Khởi tạo Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         async function handleFormSubmission() {
             const studentName = document.getElementById('studentName').value.trim();
