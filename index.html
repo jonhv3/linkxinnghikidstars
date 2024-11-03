@@ -58,6 +58,19 @@
             font-size: 14px;
             color: #555;
         }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .important-note {
+            background-color: #f8d7da;
+            padding: 10px;
+            border-left: 4px solid #dc3545;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +96,8 @@
             <button type="button" onclick="handleFormSubmission()">Gửi đơn</button>
         </form>
         <div class="note">
-            <p><strong>Lưu ý:</strong> Học sinh cần thông báo xin nghỉ ít nhất 1 tiếng trước buổi học để giáo viên có thể sắp xếp kịp thời. Quý phụ huynh hoặc học sinh có thể liên hệ trực tiếp qua số điện thoại <strong>033.622.7911</strong> để thông báo sớm nhất. <strong>Lưu ý quan trọng: Khóa 1 tháng được nghỉ 1 ngày nghỉ học bù, tương tự các khóa 3 tháng 3 ngày nghỉ được học bù, 6 tháng 6 buổi, 12 tháng 12 buổi. Các trường hợp nghỉ quá nhiều, vượt quá quy định của trung tâm sẽ bị tính là những buổi đã học và không được học bù.</strong></p>
+            <p class="highlight"><strong>Lưu ý:</strong> Học sinh cần thông báo xin nghỉ ít nhất 1 tiếng trước buổi học để giáo viên có thể sắp xếp kịp thời.</p>
+            <p class="important-note"><strong>Lưu ý quan trọng:</strong> Khóa 1 tháng được nghỉ 1 ngày nghỉ học bù, tương tự các khóa 3 tháng 3 ngày nghỉ được học bù, 6 tháng 6 buổi, 12 tháng 12 buổi. Các trường hợp nghỉ quá nhiều, vượt quá quy định của trung tâm sẽ bị tính là những buổi đã học và không được học bù.</p>
         </div>
     </div>
 
@@ -102,36 +116,6 @@
         // Khởi tạo Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // Hàm gửi thông báo đến Telegram Bot
-        function sendTelegramNotification(message) {
-            const botToken = "7688225469:AAHsXQYVaTrAtNKtA-HZqfKAvn2blR7BDfU"; // Token của bot Telegram
-            const chatIds = ["5865902257", "5738181325"]; // Danh sách Chat ID
-
-            chatIds.forEach(chatId => {
-                const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-                fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_id: chatId,
-                        text: message
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        console.log("Thông báo đã được gửi thành công!");
-                    } else {
-                        console.error("Lỗi khi gửi thông báo:", data);
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi khi kết nối tới Telegram API:", error);
-                });
-            });
-        }
 
         async function handleFormSubmission() {
             const studentName = document.getElementById('studentName').value.trim();
@@ -168,13 +152,8 @@
                     studentName,
                     subject,
                     reason,
-                    phoneNumber, // Lưu số điện thoại vào Firestore
                     absenceCount
                 }, { merge: true });
-
-                // Gửi thông báo đến Telegram
-                const notificationMessage = `Có một đơn xin nghỉ từ: \n- Tên học sinh: ${studentName}\n- Môn học: ${subject}\n- Lý do: ${reason}\n- Số điện thoại: ${phoneNumber}\n- Số lần xin nghỉ: ${absenceCount}`;
-                sendTelegramNotification(notificationMessage);
 
                 alert(`Đơn xin nghỉ học đã được gửi thành công! Số lần xin nghỉ hiện tại: ${absenceCount}`);
                 document.getElementById('absenceForm').reset();
