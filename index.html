@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trung Tâm Kidstars - Đơn xin nghỉ học</title>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -76,26 +78,84 @@
             <label for="reason">Lý do xin nghỉ:</label>
             <textarea id="reason" name="reason" rows="4" required></textarea>
 
-            <button type="button" onclick="sendEmail()">Gửi đơn</button>
+            <button type="button" onclick="handleFormSubmission()">Gửi đơn</button>
         </form>
         <div class="note">
-            <p><strong>Lưu ý:</strong> Học sinh cần thông báo xin nghỉ ít nhất 1 tiếng trước buổi học để giáo viên có thể sắp xếp kịp thời. Quý phụ huynh hoặc học sinh có thể liên hệ trực tiếp qua số điện thoại <strong>033.622.7911</strong> để thông báo sớm nhất.<strong> Lưu ý quan trọng : Khóa 1 tháng được nghỉ 1 ngày nghỉ học bù, tương tự các khóa 3 tháng 3 ngày nghỉ được học bù, 6 tháng 6 buổi, 12 tháng 12 buổi. Các trường hợp nghỉ quá nhiều , vượt quá quy định của trung tâm sẽ bị tính là những buổi đã học và không được học bù.</strong></p>
+            <p><strong>Lưu ý:</strong> Học sinh cần thông báo xin nghỉ ít nhất 1 tiếng trước buổi học để giáo viên có thể sắp xếp kịp thời. Quý phụ huynh hoặc học sinh có thể liên hệ trực tiếp qua số điện thoại <strong>033.622.7911</strong> để thông báo sớm nhất. <strong>Lưu ý quan trọng: Khóa 1 tháng được nghỉ 1 ngày nghỉ học bù, tương tự các khóa 3 tháng 3 ngày nghỉ được học bù, 6 tháng 6 buổi, 12 tháng 12 buổi. Các trường hợp nghỉ quá nhiều, vượt quá quy định của trung tâm sẽ bị tính là những buổi đã học và không được học bù.</strong></p>
         </div>
     </div>
 
-    <script>
-        function sendEmail() {
-            const studentName = document.getElementById('studentName').value;
-            const subject = document.getElementById('subject').value;
-            const reason = document.getElementById('reason').value;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKMb-bNj_wgS9Ss6W6sPd6sHkyuB0qcjU",
+            authDomain: "linkxinnghi.firebaseapp.com",
+            projectId: "linkxinnghi",
+            storageBucket: "linkxinnghi.firebasestorage.app",
+            messagingSenderId: "247357252866",
+            appId: "1:247357252866:web:ad66fad1096822784f8e1b",
+            measurementId: "G-REYGXC873Y"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function handleFormSubmission() {
+            const studentName = document.getElementById('studentName').value.trim();
+            const subject = document.getElementById('subject').value;
+            const reason = document.getElementById('reason').value.trim();
+
+            if (!studentName || !reason) {
+                alert("Vui lòng nhập đầy đủ thông tin.");
+                return;
+            }
+
+            const phoneNumber = prompt("Vui lòng nhập số điện thoại phụ huynh:");
+            if (!phoneNumber) {
+                alert("Bạn cần nhập số điện thoại để tiếp tục.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "absences", phoneNumber);
+                const docSnap = await getDoc(docRef);
+
+                let absenceCount = 0;
+                if (docSnap.exists()) {
+                    absenceCount = docSnap.data().absenceCount;
+                    const confirmResult = confirm(`Phụ huynh đã xin nghỉ ${absenceCount} lần. Bạn có chắc muốn tiếp tục xin nghỉ không?`);
+                    if (!confirmResult) {
+                        return;
+                    }
+                }
+
+                absenceCount += 1;
+
+                await setDoc(docRef, {
+                    studentName,
+                    subject,
+                    reason,
+                    absenceCount
+                }, { merge: true });
+
+                await sendEmailNotification(studentName, subject, reason, absenceCount);
+            } catch (error) {
+                console.error("Lỗi khi xử lý đơn xin nghỉ:", error);
+                alert("Có lỗi xảy ra. Vui lòng thử lại.");
+            }
+        }
+
+        function sendEmailNotification(studentName, subject, reason, absenceCount) {
             const emailData = {
-                studentName: studentName,
-                subject: subject,
-                reason: reason
+                studentName,
+                subject,
+                reason,
+                absenceCount
             };
 
-            fetch('https://script.google.com/macros/s/AKfycbwfIn6sAj7gi6iMDPJTlGboZM1JAZUpoRT0XB4oLCjWVjEBKC7vPOdUyKkcHrVtcw-avg/exec', {
+            return fetch('https://script.google.com/macros/s/AKfycbwfIn6sAj7gi6iMDPJTlGboZM1JAZUpoRT0XB4oLCjWVjEBKC7vPOdUyKkcHrVtcw-avg/exec', {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: {
@@ -103,11 +163,11 @@
                 },
                 body: JSON.stringify(emailData)
             }).then(() => {
-                alert('Đơn xin nghỉ học đã được gửi thành công!');
+                alert(`Đơn xin nghỉ học đã được gửi thành công! Số lần xin nghỉ hiện tại: ${absenceCount}`);
                 document.getElementById('absenceForm').reset();
             }).catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+                console.error("Error:", error);
+                alert("Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.");
             });
         }
     </script>
