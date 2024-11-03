@@ -106,27 +106,30 @@
         // Hàm gửi thông báo đến Telegram Bot
         function sendTelegramNotification(message) {
             const botToken = "7688225469:AAHsXQYVaTrAtNKtA-HZqfKAvn2blR7BDfU"; // Token của bot Telegram
-            const chatId = ["5865902257", "5738181325"]; // Chat ID của bạn
-            const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const chatIds = ["5865902257", "5738181325"]; // Mảng chứa tất cả các Chat ID
 
-            fetch(apiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: message
+            chatIds.forEach(chatId => {
+                const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+                fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    console.log("Thông báo đã được gửi thành công!");
-                } else {
-                    console.error("Lỗi khi gửi thông báo:", data);
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi khi kết nối tới Telegram API:", error);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        console.log(`Thông báo đã được gửi thành công đến ${chatId}`);
+                    } else {
+                        console.error(`Lỗi khi gửi thông báo đến ${chatId}:`, data);
+                    }
+                })
+                .catch(error => {
+                    console.error(`Lỗi khi kết nối tới Telegram API cho ${chatId}:`, error);
+                });
             });
         }
 
