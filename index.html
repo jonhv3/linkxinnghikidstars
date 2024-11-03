@@ -106,7 +106,7 @@
         // Hàm gửi thông báo đến Telegram Bot
         function sendTelegramNotification(message) {
             const botToken = "7688225469:AAHsXQYVaTrAtNKtA-HZqfKAvn2blR7BDfU"; // Token của bot Telegram
-            const chatIds = ["5865902257", "5738181325"]; // Mảng chứa tất cả các Chat ID
+            const chatIds = ["5865902257", "5738181325"]; // Danh sách Chat ID
 
             chatIds.forEach(chatId => {
                 const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -122,13 +122,13 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.ok) {
-                        console.log(`Thông báo đã được gửi thành công đến ${chatId}`);
+                        console.log("Thông báo đã được gửi thành công!");
                     } else {
-                        console.error(`Lỗi khi gửi thông báo đến ${chatId}:`, data);
+                        console.error("Lỗi khi gửi thông báo:", data);
                     }
                 })
                 .catch(error => {
-                    console.error(`Lỗi khi kết nối tới Telegram API cho ${chatId}:`, error);
+                    console.error("Lỗi khi kết nối tới Telegram API:", error);
                 });
             });
         }
@@ -168,11 +168,12 @@
                     studentName,
                     subject,
                     reason,
+                    phoneNumber, // Lưu số điện thoại vào Firestore
                     absenceCount
                 }, { merge: true });
 
                 // Gửi thông báo đến Telegram
-                const notificationMessage = `Có một đơn xin nghỉ từ: \n- Tên học sinh: ${studentName}\n- Môn học: ${subject}\n- Lý do: ${reason}\n- Số lần xin nghỉ: ${absenceCount}`;
+                const notificationMessage = `Có một đơn xin nghỉ từ: \n- Tên học sinh: ${studentName}\n- Môn học: ${subject}\n- Lý do: ${reason}\n- Số điện thoại: ${phoneNumber}\n- Số lần xin nghỉ: ${absenceCount}`;
                 sendTelegramNotification(notificationMessage);
 
                 alert(`Đơn xin nghỉ học đã được gửi thành công! Số lần xin nghỉ hiện tại: ${absenceCount}`);
